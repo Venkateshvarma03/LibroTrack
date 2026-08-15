@@ -7,33 +7,19 @@ const {
   checkoutBookService,
 } = require('../services/book.service');
 
-const redisClient = require('../config/redis');
+//const redisClient = require('../config/redis');
 const AppError = require('../utils/AppError');
 
 async function getAllBooks(req, res) {
   try {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
-    const cacheKey = `books:page${page}:limit${limit}`;
-
-    const cachedBooks = await redisClient.get(cacheKey);
-
-    if (cachedBooks) {
-      console.log('Cache hit');
-      return res.json(JSON.parse(cachedBooks));
-    }
-
-    console.log('Cache miss');
     const books = await getAllBooksService(page, limit);
-
-    await redisClient.set(cacheKey, JSON.stringify(books), { EX: 30 });
-
     res.json(books);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 }
-
 async function createBook(req, res, next) {
   try {
     const book = await createBookService(req.body);
