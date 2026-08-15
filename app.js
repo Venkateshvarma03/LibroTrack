@@ -3,6 +3,10 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const logger = require('./config/logger');
+const helmet = require('helmet');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
+
 const {
   createBook,
   getAllBooks,
@@ -15,9 +19,13 @@ const errorHandler = require('./middleware/errorHandler');
 const validateBook = require('./middleware/validateBook');
 const { registerUser, loginUser } = require('./controllers/auth.controller');
 const { requireAuth, requireAdmin } = require('./middleware/auth.middleware');
-const rateLimit = require('express-rate-limit');
 
 app.use(express.json());
+app.use(helmet());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true,
+}));
 
 app.use((req, res, next) => {
   logger.info(`${req.method} ${req.url}`);
@@ -32,6 +40,12 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { error: 'Too many login attempts, please try again later.' },
+});
+
 app.post('/books', requireAuth, validateBook, createBook);
 app.get('/books', getAllBooks);
 app.get('/books/:id', getBookById);
@@ -39,7 +53,7 @@ app.put('/books/:id', requireAuth, updateBook);
 app.put('/books/:id/checkout', requireAuth, checkoutBook);
 app.delete('/books/:id', requireAuth, requireAdmin, deleteBook);
 app.post('/auth/register', registerUser);
-app.post('/auth/login', loginUser);
+app.post('/auth/login', loginLimiter, loginUser);
 
 app.get('/', (req, res) => {
   res.send('Welcome to LibroTrack API');
