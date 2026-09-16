@@ -5,6 +5,7 @@ const bookSchema = new mongoose.Schema({
   author: { type: String, required: true },
   isbn: { type: String, unique: true, sparse: true },
   available: { type: Boolean, default: true },
+  coverImageUrl: { type: String },
 }, { timestamps: true });
 
 const Book = mongoose.model('Book', bookSchema);

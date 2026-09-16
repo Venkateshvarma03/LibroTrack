@@ -8,6 +8,9 @@ const config = {
   redisPort: process.env.REDIS_PORT,
   redisPassword: process.env.REDIS_PASSWORD,
   resendApiKey: process.env.RESEND_API_KEY,
+  cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME,
+  cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
+  cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
 };
 
 const requiredKeys = ['mongoUri', 'jwtSecret'];

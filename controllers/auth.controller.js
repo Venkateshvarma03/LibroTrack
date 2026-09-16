@@ -16,7 +16,7 @@ async function loginUser(req, res) {
     const { user, token } = await loginUserService(username, password);
     res.json({ id: user._id, username: user.username, role: user.role, token });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: err.message});
   }
 }
 

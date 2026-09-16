@@ -5,10 +5,20 @@ const {
   updateBookService,
   deleteBookService,
   checkoutBookService,
+  uploadBookCoverService,
 } = require('../services/book.service');
 
 //const redisClient = require('../config/redis');
 const AppError = require('../utils/AppError');
+
+async function createBook(req, res, next) {
+  try {
+    const book = await createBookService(req.body);
+    res.status(201).json(book);
+  } catch (err) {
+    next(new AppError(err.message, 400));
+  }
+}
 
 async function getAllBooks(req, res) {
   try {
@@ -18,14 +28,6 @@ async function getAllBooks(req, res) {
     res.json(books);
   } catch (err) {
     res.status(500).json({ error: err.message });
-  }
-}
-async function createBook(req, res, next) {
-  try {
-    const book = await createBookService(req.body);
-    res.status(201).json(book);
-  } catch (err) {
-    next(new AppError(err.message, 400));
   }
 }
 
@@ -84,4 +86,19 @@ async function checkoutBook(req, res, next) {
   }
 }
 
-module.exports = { createBook, getAllBooks, getBookById, updateBook, deleteBook, checkoutBook };
+async function uploadBookCover(req, res, next) {
+  try {
+    const { id } = req.params;
+
+    if (!req.file) {
+      throw new AppError('No file uploaded', 400);
+    }
+
+    const book = await uploadBookCoverService(id, req.file.buffer);
+    res.json(book);
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { createBook, getAllBooks, getBookById, updateBook, deleteBook, checkoutBook, uploadBookCover };

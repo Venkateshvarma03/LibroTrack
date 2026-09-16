@@ -43,5 +43,18 @@ async function checkoutBookService(id) {
   return await book.save();
 }
 
+const cloudinary = require('../config/cloudinary');
 
-module.exports = { createBookService,getAllBooksService,getBookByIdService,updateBookService,deleteBookService,checkoutBookService};
+async function uploadBookCoverService(id, fileBuffer) {
+  const uploadResult = await new Promise((resolve, reject) => {
+    cloudinary.uploader.upload_stream({ folder: 'librotrack-covers' }, (error, result) => {
+      if (error) reject(error);
+      else resolve(result);
+    }).end(fileBuffer);
+  });
+
+  const book = await Book.findByIdAndUpdate(id, { coverImageUrl: uploadResult.secure_url }, { new: true });
+  return book;
+}
+
+module.exports = { createBookService, getAllBooksService, getBookByIdService, updateBookService, deleteBookService, checkoutBookService, uploadBookCoverService };

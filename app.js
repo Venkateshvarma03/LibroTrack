@@ -6,7 +6,7 @@ const logger = require('./config/logger');
 const helmet = require('helmet');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
-
+const upload = require('./middleware/upload.middleware');
 const {
   createBook,
   getAllBooks,
@@ -14,6 +14,7 @@ const {
   updateBook,
   deleteBook,
   checkoutBook,
+  uploadBookCover,
 } = require('./controllers/book.controller');
 const errorHandler = require('./middleware/errorHandler');
 const validateBook = require('./middleware/validateBook');
@@ -38,11 +39,11 @@ const limiter = rateLimit({
   message: { error: 'Too many requests, please try again later.' },
 });
 
-//app.use(limiter);
+app.use(limiter);
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 5,
   message: { error: 'Too many login attempts, please try again later.' },
 });
 
@@ -73,6 +74,8 @@ app.get('/health', async (req, res) => {
     res.status(500).json({ status: 'unhealthy', error: err.message });
   }
 });
+
+app.post('/books/:id/cover', requireAuth, upload.single('cover'), uploadBookCover);
 
 mongoose.connect(config.mongoUri)
   .then(() => console.log('Connected to MongoDB'))
